@@ -55,9 +55,3 @@ Build a self-hosted Node.js application that automates the transition from raw E
 
 ---
 
-## 5️⃣ BRANDING RECAP
-
-- **Company:** SHRI DHURGAI trans
-- **Address:** No.33, Nellipattai High Road, Jamin Royapettai, Chromepet, Chennai - 600 044
-- **Signature:** RAVI PALANI
-- **Colors:** Navy Blue (#002D62), Red (#E31E24)
