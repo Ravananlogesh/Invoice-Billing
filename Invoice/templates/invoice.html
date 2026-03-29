@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice - SHRI DHURGAI TRANS</title>
+    <style>
+        /* A4 Page Setup */
+        @page {
+            size: A4;
+            margin: 0;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Times New Roman", Times, serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+
+        .a4-sheet {
+            background: white;
+            width: 210mm;
+            padding: 10mm;
+            margin: 0 auto;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        /* Logo & Header Colors */
+        .header-container {
+            text-align: center;
+            margin-bottom: 2px;
+        }
+
+        .logo-text {
+            font-size: 42px;
+            font-weight: 900;
+            margin-bottom: 0;
+            font-family: Arial, sans-serif; /* Logo usually uses sans-serif */
+        }
+
+        .blue-part {
+            color: #002D62;
+        }
+
+        .red-part {
+            color: #E31E24;
+            font-style: italic;
+            font-weight: normal;
+        }
+
+        .contact-info {
+            color: #002D62;
+            font-size: 15px;
+            margin-top: -5px;
+        }
+
+        .contact-details {
+            color: #002D62;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .header-line {
+            border-bottom: 2.5px solid #002D62;
+            margin: 5px 0 20px 0;
+        }
+
+        /* Table Specifics */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            border: 1.5px solid #000;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 4px 6px;
+            font-size: 13.5px;
+            vertical-align: top;
+            word-wrap: break-word;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .right {
+            text-align: right;
+        }
+
+        .bold-blue {
+            color: #002D62;
+            font-weight: bold;
+        }
+
+        .job-details {
+            font-size: 13px;
+        }
+
+        .main-content-row td {
+            height: 120px;
+        }
+
+        .footer-section {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 0 5px;
+        }
+
+        .bank-details {
+            font-size: 13px;
+            line-height: 1.4;
+            color: #002D62;
+        }
+
+        .sig-area {
+            text-align: right;
+            width: 45%;
+            font-size: 14px;
+            color: #002D62;
+        }
+
+        .bottom-note {
+            text-align: center;
+            font-size: 11.5px;
+            margin-top: 15px;
+            padding-top: 5px;
+            color: #002D62;
+        }
+        
+        .amount-col {
+            width: 15%;
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="a4-sheet">
+        <div class="header-container">
+            <div class="logo-text">
+                <span class="blue-part">SHRI DHURGAI</span><span class="red-part">trans</span>
+            </div>
+            <div class="contact-info">
+                No.33, Nellipattai High Road, Jamin Royapettai, Chromepet, Chennai - 600 044.
+            </div>
+            <div class="contact-details">
+                Ph : &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cell : 9789012373 &nbsp;&nbsp; email: ravikalai1975@gmail.com
+            </div>
+        </div>
+
+        <div class="header-line"></div>
+
+        <table>
+            <tr>
+                <td colspan="3" class="center" style="font-size: 15px;">Invoice cum Bill</td>
+                <td colspan="3" class="center" style="font-size: 14px;">Original / Duplicate</td>
+            </tr>
+            <tr>
+                <td colspan="3" style="width: 50%; height: 80px;">
+                    <strong style="color: #002D62; font-size: 14px;">M/s. {{client.name}}</strong><br>
+                    <span style="font-size: 13px;">{{client.address}}</span><br><br>
+                    <span>GST No. {{client.gstNo}}</span>
+                </td>
+                <td colspan="1" style="width: 15%;">
+                    <span>Bill No.</span><br>
+                    <strong style="color: #002D62; font-size: 16px;">{{invoice.number}}</strong><br>
+                    <span>Date</span><br>
+                    <strong style="color: #002D62; font-size: 14px;">{{invoice.date}}</strong>
+                </td>
+                <td colspan="2" style="width: 35%;" class="job-details">
+                    Job No. & Date : {{invoice.jobNumberAndDate}}<br><br>
+                    Exp Inv No. {{invoice.exportInvoiceNumber}}
+                </td>
+            </tr>
+            <tr style="text-align: center; font-weight: bold; background: #f9f9f9;">
+                <td style="width: 8%;">Sl.no</td>
+                <td style="width: 42%;">Details of Transport</td>
+                <td style="width: 12%;">Quantity</td>
+                <td style="width: 10%;">Rate</td>
+                <td style="width: 8%;">Per</td>
+                <td style="width: 20%;">Amount</td>
+            </tr>
+
+            <!-- Item Rows -->
+            {{#each items}}
+            <tr class="main-content-row">
+                <td class="center">{{sNo}}</td>
+                <td style="font-size: 13px;">
+                    {{{details}}}<br><br>
+                    <strong>CONTRNO: {{containerNo}}</strong>
+                </td>
+                <td class="center">{{quantity}}</td>
+                <td class="center">{{rate}}</td>
+                <td class="center">{{per}}</td>
+                <td class="right" style="font-weight: bold; font-size: 14px;">{{amount}}</td>
+            </tr>
+            {{/each}}
+
+            <tr>
+                <td class="center">2</td>
+                <td>HALTING</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="right"></td>
+            </tr>
+            <tr>
+                <td class="center">3</td>
+                <td>Weighment Charge</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="right"></td>
+            </tr>
+            <tr>
+                <td class="center">4</td>
+                <td style="font-weight: bold;">TOTAL</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td class="right" style="font-weight: bold; font-size: 14px;">{{totalAmount}}</td>
+            </tr>
+            <tr>
+                <td colspan="5" style="border-bottom: none;">Total Amount Chargeable ( in words)</td>
+                <td class="center" style="font-weight: bold;">E&O.E</td>
+            </tr>
+            <tr>
+                <td colspan="6" style="border-top: none; font-weight: bold; font-size: 14px;">Rs. {{totalAmountInWords}}</td>
+            </tr>
+        </table>
+
+        <div class="footer-section">
+            <div class="bank-details">
+                PAN NO.AFNPR2251J<br>
+                GSTN No.33AFNPR2251J1ZA<br><br>
+                Name : SHRI DHURGAI TRANS<br>
+                ACCOUNT NO : 1119135000008117<br>
+                IFSC CODE : KVBL0001119<br>
+                BANK : KARUR VYSYA BANK<br>
+                BRANCH : CHROMPET
+            </div>
+            <div class="sig-area">
+                For Shri Dhurgai Trans<br><br><br><br>
+                <strong style="font-size: 16px;">RAVI PALANI</strong><br>
+                Authorised Signatory
+            </div>
+        </div>
+
+        <div class="bottom-note">
+            This is a Computer Generated Invoice <br>
+            *GST Payable by Actual Service Receiver under RCM vide Notification No.5/2017-Central Tax Dt. 19.06.2017 if applicable *
+        </div>
+    </div>
+
+</body>
+
+</html>

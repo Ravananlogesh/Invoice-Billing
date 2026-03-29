@@ -1,0 +1,92 @@
+{
+  "name": "invoice-system",
+  "version": "1.0.0",
+  "description": "Dynamic Invoice PDF Generation System",
+  "main": "main.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "npm run build && node dist/server.js",
+    "dev": "nodemon",
+    "electron:dev": "npm run build && concurrently \"node dist/server.js\" \"wait-on http://localhost:3000 && electron .\"",
+    "electron:build": "npm run build && electron-builder",
+    "prepack": "npm run build"
+  },
+  "build": {
+    "appId": "com.shridhurgais.billing",
+    "productName": "Shri Dhurgai Trans Billing",
+    "win": {
+      "target": "nsis",
+      "icon": "web/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "runAfterFinish": true
+    },
+    "files": [
+      "dist/**/*",
+      "web/**/*",
+      "templates/**/*",
+      "data/**/*",
+      "main.js",
+      "package.json"
+    ],
+    "directories": {
+      "output": "dist_electron"
+    }
+  },
+  "nodemonConfig": {
+    "watch": [
+      "server.ts",
+      "services",
+      "templates"
+    ],
+    "ext": "ts,html,handlebars,json",
+    "ignore": [
+      "data/",
+      "uploads/",
+      "node_modules/",
+      "web/",
+      "dist/",
+      "*.xlsx",
+      "*.pdf"
+    ],
+    "exec": "ts-node server.ts"
+  },
+  "keywords": [
+    "invoice",
+    "pdf",
+    "puppeteer",
+    "nodejs",
+    "typescript"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/multer": "^2.1.0",
+    "@types/sqlite3": "^3.1.11",
+    "cors": "^2.8.6",
+    "docx": "^9.6.1",
+    "express": "^4.19.2",
+    "handlebars": "^4.7.8",
+    "multer": "^2.1.1",
+    "pdf-lib": "^1.17.1",
+    "puppeteer": "^22.10.0",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^6.0.1",
+    "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.24",
+    "concurrently": "^9.2.1",
+    "electron": "^41.0.2",
+    "electron-builder": "^26.8.1",
+    "nodemon": "^3.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "wait-on": "^9.0.4"
+  }
+}

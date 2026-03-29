@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>SHRI DHURGAI TRANS | Intelligent Billing Agent v1.2.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #002D62;      /* Navy Blue */
+            --accent: #E31E24;       /* Red */
+            --bg: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            --radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        nav {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0.5rem 0;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        nav button.active {
+            color: white;
+            border-bottom-color: var(--accent);
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .view {
+            display: none;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-area {
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--radius);
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background-color: rgba(0, 45, 98, 0.02);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #001a3d;
+            transform: translateY(-1px);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: white;
+        }
+
+        .btn-accent:hover {
+            background-color: #c4181d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+
+        th {
+            background-color: #f1f5f9;
+            text-align: left;
+            padding: 1rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.95rem;
+        }
+
+        tr:hover td {
+            background-color: #f8fafc;
+        }
+
+        .status {
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .status-signed { background: #dcfce7; color: #166534; }
+        .status-pending { background: #fef9c3; color: #854d0e; }
+
+        #loadingOverlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            padding: 1rem 2rem;
+            background: var(--primary);
+            color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transform: translateY(100px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .toast.show { transform: translateY(0); }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            border-radius: var(--radius);
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 2rem;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .close-modal:hover { color: var(--accent); }
+
+        .preview-invoice-container {
+            font-family: 'Times New Roman', Times, serif;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 2rem;
+            background: white;
+        }
+
+        .preview-header {
+            text-align: center;
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 0.5rem;
+        }
+
+        .preview-label { font-weight: 700; color: var(--primary); min-width: 150px; }
+        .preview-value { flex: 1; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">
+        SHRI DHURGAI <span>trans</span> 
+        <small style="font-size: 0.6rem; background: var(--accent); color: white; padding: 2px 5px; border-radius: 3px; vertical-align: top; margin-left: 5px;">v1.2.0</small>
+        <span id="connectionStatus" style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; margin-left: 10px;" title="Checking Connection..."></span>
+        <small id="uptimeDisplay" style="font-size: 0.6rem; color: #94a3b8; margin-left: 5px;"></small>
+    </div>
+    <nav>
+        <button id="navUpload" class="active">UPLOAD & GENERATE</button>
+        <button id="navHistory">HISTORY VAULT</button>
+    </nav>
+</header>
+
+<main>
+    <div id="liveServerWarning" style="display: none; background: #fffbeb; border-bottom: 1px solid #fef3c7; color: #92400e; padding: 0.75rem; text-align: center; font-size: 0.85rem; font-weight: 500;">
+        ⚠️ <strong>Live Server Detected:</strong> Auto-refresh may interrupt uploads. For best stability, use <a href="http://localhost:3000" style="color: var(--primary); text-decoration: underline;">http://localhost:3000</a>
+    </div>
+    <!-- Upload View -->
+    <div id="uploadView" class="view active">
+        <div class="card">
+            <h2 style="margin-bottom: 1rem; color: var(--primary);">Generate New Invoices</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Upload your transport data Excel file to begin the professional billing process.</p>
+            
+            <div class="upload-area" id="dropZone">
+                <input type="file" id="excelInput" style="display: none;" accept=".xlsx, .xls">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                <p>Drag & Drop your Excel file or <strong>Click to Browse</strong></p>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 0.5rem;">Supports .xlsx and .xls formats</p>
+            </div>
+        </div>
+
+        <div id="previewCard" class="card" style="display: none;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <div>
+                    <h3 id="previewTitle" style="color: var(--primary); font-size: 1.25rem;">Preview Transport Data</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted);">Review rows before generating signed PDFs.</p>
+                </div>
+                  <div style="text-align: right; display: flex; align-items: center; gap: 1rem;">
+                    <div class="toggle-container" style="display: flex; align-items: center; gap: 0.5rem; background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; cursor: pointer;" onclick="toggleGrouping()">
+                        <span id="groupToggleIcon">📁</span> Group by Customer
+                    </div>
+                    <button id="clearData" class="btn" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: #fee2e2; color: #991b1b;">Clear All</button>
+                    <div>
+                        <span id="rowCount" style="font-weight: 700; color: var(--primary); font-size: 1.1rem;">0</span>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase;">Records</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 8px;">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 110px;">Date</th>
+                            <th style="width: 130px;">Bill No</th>
+                            <th>Customer / Party Name</th>
+                            <th style="width: 140px;">Container No</th>
+                            <th style="width: 110px; text-align: right;">Amount</th>
+                            <th style="width: 180px; text-align: center;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dataBody"></tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 1.5rem; padding: 1rem; background: #f8fafc; border-radius: 8px; font-size: 0.85rem; color: var(--text-muted); border: 1px solid #e2e8f0;">
+                <strong style="color: var(--primary);">Tip:</strong> Ensure the Bill No and Customer names are correct. The system will use 'Standard Customer' if the name is missing in Excel.
+            </div>
+        </div>
+    </div>
+
+    <!-- History View -->
+    <div id="historyView" class="view">
+        <div class="card">
+            <h2 style="margin-bottom: 1rem; color: var(--primary);">Invoice History Vault</h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">Access and re-download all previously generated and signed invoices.</p>
+            
+            <div style="overflow-x: auto;">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Bill No</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div id="invoiceModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModal">&times;</span>
+        <h2 style="color: var(--primary); margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 10px;">Full Invoice Preview</h2>
+        <div id="modalBody" class="preview-invoice-container">
+            <!-- Populated dynamically -->
+        </div>
+        <div style="margin-top: 2rem; display: flex; justify-content: flex-end; gap: 1rem;">
+            <button class="btn" style="background: #e2e8f0;" id="closeModalBtn">Close Preview</button>
+            <button class="btn btn-primary" id="modalGenerateBtn">Download PDF</button>
+        </div>
+    </div>
+</div>
+
+<div id="loadingOverlay">
+    <div class="spinner"></div>
+    <p id="loadingText" style="font-weight: 600; color: var(--primary);">Processing...</p>
+</div>
+
+<div id="toast" class="toast">Action completed successfully</div>
+
+<script>
+    const navUpload = document.getElementById('navUpload');
+    const navHistory = document.getElementById('navHistory');
+    const uploadView = document.getElementById('uploadView');
+    const historyView = document.getElementById('historyView');
+    const dropZone = document.getElementById('dropZone');
+    const excelInput = document.getElementById('excelInput');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const toast = document.getElementById('toast');
+    const previewCard = document.getElementById('previewCard');
+    const dataBody = document.getElementById('dataBody');
+    const rowCount = document.getElementById('rowCount');
+
+    // Global State
+    let currentData = [];
+    let isGrouped = false;
+    console.log("Invoice App v1.2.0 Initialized");
+
+    // Restore State
+    window.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem('cachedInvoiceData');
+        if (saved) {
+            try {
+                currentData = JSON.parse(saved);
+                if (currentData && currentData.length > 0) {
+                    console.log("Restored state from localStorage:", currentData.length, "rows");
+                    renderPreview(currentData);
+                    showToast('Restored previous session');
+                }
+            } catch (e) {
+                localStorage.removeItem('cachedInvoiceData');
+            }
+        }
+    });
+
+    if (window.location.port === '5500') {
+        document.getElementById('liveServerWarning').style.display = 'block';
+    }
+    
+    // Handle dynamic backend URL
+    const API_BASE = (window.location.port !== '3000') ? `http://${window.location.hostname}:3000` : '';
+    console.log("Invoice App v1.0.5 - Target Backend:", API_BASE || "Same Origin");
+
+    async function checkConnection() {
+        const dot = document.getElementById('connectionStatus');
+        const uptimeText = document.getElementById('uptimeDisplay');
+        try {
+            const res = await fetch(`${API_BASE}/ping`, { cache: 'no-store' });
+            if (res.ok) {
+                const info = await res.json();
+                dot.style.background = '#22c55e';
+                dot.title = `Connected: v${info.version}`;
+                uptimeText.textContent = `Uptime: ${info.uptime}`;
+                
+                // If uptime is very low, server just restarted
+                if (parseInt(info.uptime) < 5) {
+                    console.warn("Server just restarted! Previous requests may have been killed.");
+                }
+            } else {
+                throw new Error();
+            }
+        } catch (e) {
+            dot.style.background = '#ef4444';
+            dot.title = 'Disconnected (Start Node server on 3000)';
+            uptimeText.textContent = 'OFFLINE';
+        }
+    }
+    
+    checkConnection();
+    setInterval(checkConnection, 5000);
+
+    navUpload.onclick = () => switchView('upload');
+    navHistory.onclick = () => {
+        switchView('history');
+        loadHistory();
+    };
+
+    function switchView(view) {
+        if (view === 'upload') {
+            navUpload.classList.add('active');
+            navHistory.classList.remove('active');
+            uploadView.classList.add('active');
+            historyView.classList.remove('active');
+        } else {
+            navUpload.classList.remove('active');
+            navHistory.classList.add('active');
+            uploadView.classList.remove('active');
+            historyView.classList.add('active');
+        }
+    }
+
+    // Upload Handling
+    dropZone.onclick = () => excelInput.click();
+    excelInput.onchange = (e) => handleFile(e.target.files[0]);
+
+    dropZone.ondragover = (e) => { e.preventDefault(); dropZone.style.borderColor = 'var(--primary)'; };
+    dropZone.ondragleave = () => { dropZone.style.borderColor = '#cbd5e1'; };
+    dropZone.ondrop = (e) => {
+        e.preventDefault();
+        dropZone.style.borderColor = '#cbd5e1';
+        handleFile(e.dataTransfer.files[0]);
+    };
+
+    async function handleFile(file) {
+        if (!file) return;
+        
+        showLoading('Parsing Excel data...');
+        const formData = new FormData();
+        formData.append('excelFile', file);
+
+        try {
+            console.log(`Uploading to: ${API_BASE}/upload`);
+            const res = await fetch(`${API_BASE}/upload`, { method: 'POST', body: formData });
+            
+            if (res.ok) {
+                currentData = await res.json();
+                localStorage.setItem('cachedInvoiceData', JSON.stringify(currentData));
+                console.log("Received and Cached data:", currentData);
+                renderPreview(currentData);
+                showToast('Excel uploaded successfully!');
+            } else {
+                const errorData = await res.json().catch(() => ({}));
+                alert(`Upload failed (Status ${res.status}): ${errorData.error || 'Server Error'}`);
+            }
+        } catch (err) {
+            console.error('Fetch Error:', err);
+            alert(`Connection Error to Backend!\n\nTarget URL: ${API_BASE}/upload\n\nEnsure Node server is running on port 3000.`);
+        } finally {
+            hideLoading();
+            excelInput.value = '';
+        }
+    }
+
+    document.getElementById('clearData').addEventListener('click', () => {
+        console.log("Clear All button clicked");
+        currentData = [];
+        localStorage.removeItem('cachedInvoiceData');
+        
+        if (previewCard) previewCard.style.display = 'none';
+        if (dataBody) dataBody.innerHTML = '';
+        if (rowCount) rowCount.textContent = '0';
+        
+        showToast('Data cleared from session');
+    });
+
+    function toggleGrouping() {
+        isGrouped = !isGrouped;
+        document.getElementById('groupToggleIcon').textContent = isGrouped ? '📂' : '📁';
+        renderPreview(currentData);
+    }
+
+    function renderPreview(data) {
+        dataBody.innerHTML = '';
+        rowCount.textContent = data.length;
+        
+        if (isGrouped) {
+            renderGroupedPreview(data);
+            return;
+        }
+        
+        data.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            const displayDate = row.date || '---';
+            const displayBill = row.billNo || '<em style="color:#94a3b8">Pending...</em>';
+            const displayCustomer = row.customer || '<strong style="color:var(--accent)">Standard Customer</strong>';
+            const displayAmount = row.amount ? `₹${Number(row.amount).toLocaleString('en-IN', {minimumFractionDigits: 2})}` : '₹0.00';
+
+            tr.innerHTML = `
+                <td style="color: var(--text-muted); font-size: 0.85rem;">${displayDate}</td>
+                <td style="font-weight: 700; color: var(--primary); letter-spacing: 0.02em;">${displayBill}</td>
+                <td class="row-clickable" onclick="showInvoicePreview(${index})" style="cursor: pointer;">
+                    <div style="font-weight: 500;">${displayCustomer}</div>
+                </td>
+                <td style="font-size: 0.85rem; color: #475569;">${row.containerNo || '<span style="color:#cbd5e1">N/A</span>'}</td>
+                <td style="font-weight: 800; text-align: right; color: var(--primary); font-family: monospace; font-size: 1rem;">${displayAmount}</td>
+                <td style="text-align: center; display: flex; gap: 5px; justify-content: center;">
+                    <button class="btn" style="padding: 0.4rem 0.6rem; font-size: 0.7rem; background: #f1f5f9; color: var(--primary);" onclick="showInvoicePreview(${index})">
+                        Details
+                    </button>
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.7rem;" onclick="generateInvoiceAtIndex(${index}, 'pdf')">
+                        PDF
+                    </button>
+                    <button class="btn btn-accent" style="padding: 0.4rem 0.8rem; font-size: 0.7rem; background: #64748b;" onclick="generateInvoiceAtIndex(${index}, 'word')">
+                        Word
+                    </button>
+                </td>
+            `;
+            dataBody.appendChild(tr);
+        });
+        previewCard.style.display = 'block';
+        if (data.length > 0) previewCard.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderGroupedPreview(data) {
+        const groups = {};
+        data.forEach(row => {
+            const name = row.customer || 'Standard Customer';
+            if (!groups[name]) groups[name] = [];
+            groups[name].push(row);
+        });
+
+        Object.keys(groups).forEach(customerName => {
+            const rows = groups[customerName];
+            const total = rows.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+            
+            const tr = document.createElement('tr');
+            tr.style.backgroundColor = '#f1f5f9';
+            tr.innerHTML = `
+                <td colspan="3" style="font-weight: 700; color: var(--primary);">${customerName}</td>
+                <td style="font-size: 0.8rem; color: var(--text-muted);">${rows.length} Invoices</td>
+                <td style="font-weight: 800; text-align: right; color: var(--primary);">₹${total.toLocaleString('en-IN')}</td>
+                <td style="text-align: center;">
+                    <button class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.7rem;" onclick="generateCombinedPdf('${customerName}')">
+                        Merge PDF
+                    </button>
+                </td>
+            `;
+            dataBody.appendChild(tr);
+        });
+        previewCard.style.display = 'block';
+    }
+
+    function showInvoicePreview(index) {
+        const row = currentData[index];
+        const modalBody = document.getElementById('modalBody');
+        const modal = document.getElementById('invoiceModal');
+        const generateBtn = document.getElementById('modalGenerateBtn');
+        
+        modalBody.innerHTML = `
+            <div class="preview-header">
+                <h3 style="color: var(--primary); font-size: 1.5rem; margin-bottom: 5px;">SHRI DHURGAI trans</h3>
+                <p style="font-size: 0.8rem;">Invoice cum Bill Preview</p>
+            </div>
+            <div class="preview-row"><span class="preview-label">Bill No:</span><span class="preview-value">${row.billNo || '---'}</span></div>
+            <div class="preview-row"><span class="preview-label">Date:</span><span class="preview-value">${row.date || '---'}</span></div>
+            <div class="preview-row"><span class="preview-label">Customer:</span><span class="preview-value">${row.customer || 'Standard Customer'}</span></div>
+            <div class="preview-row"><span class="preview-label">GST No:</span><span class="preview-value">${row.gstNo || '---'}</span></div>
+            <div class="preview-row"><span class="preview-label">Container No:</span><span class="preview-value">${row.containerNo || '---'}</span></div>
+            <div class="preview-row"><span class="preview-label">Job No & Date:</span><span class="preview-value">${row.jobNumberAndDate || '---'}</span></div>
+            <div class="preview-row"><span class="preview-label">Exp Inv No:</span><span class="preview-value">${row.expInvNo || '---'}</span></div>
+            <div class="preview-row"><span class="preview-label">Transport Details:</span><span class="preview-value">${row.details || '---'}</span></div>
+            <div class="preview-row" style="border-top: 2px solid #eee; margin-top: 20px; padding-top: 10px;">
+                <span class="preview-label">Total Amount:</span>
+                <span class="preview-value" style="font-size: 1.5rem; font-weight: 800; color: var(--primary);">₹${Number(row.amount || 0).toLocaleString('en-IN')}</span>
+            </div>
+        `;
+        
+        generateBtn.onclick = () => {
+            closeModal();
+            generateInvoiceAtIndex(index, 'pdf');
+        };
+        
+        modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+        document.getElementById('invoiceModal').style.display = 'none';
+    }
+
+    document.getElementById('closeModal').onclick = closeModal;
+    document.getElementById('closeModalBtn').onclick = closeModal;
+    window.onclick = (e) => {
+        if (e.target === document.getElementById('invoiceModal')) closeModal();
+    };
+
+    async function generateInvoiceAtIndex(index, type) {
+        const rowData = currentData[index];
+        const endpoint = type === 'word' ? '/generate-word' : '/generate-invoice';
+        const fileExt = type === 'word' ? 'docx' : 'pdf';
+        
+        showLoading(`Generating ${type.toUpperCase()}...`);
+        try {
+            const res = await fetch(`${API_BASE}${endpoint}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(rowData)
+            });
+
+            if (res.ok) {
+                const mimeType = type === 'word' ? 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' : 'application/pdf';
+                const blob = new Blob([await res.arrayBuffer()], { type: mimeType });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const safeBillNo = (rowData.billNo || Date.now()).toString().replace(/[^a-z0-9]/gi, '_');
+                a.download = `Invoice-${safeBillNo}.${fileExt}`;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+                showToast(`${type.toUpperCase()} downloaded!`);
+            }
+        } catch (err) {
+            alert('Generation failed');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function generateCombinedPdf(customerName) {
+        const customerRows = currentData.filter(r => (r.customer || 'Standard Customer') === customerName);
+        showLoading(`Merging ${customerRows.length} PDFs...`);
+        
+        try {
+            const res = await fetch(`${API_BASE}/generate-combined`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ rows: customerRows })
+            });
+
+            if (res.ok) {
+                const blob = new Blob([await res.arrayBuffer()], { type: 'application/pdf' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const safeName = customerName.replace(/[^a-z0-9]/gi, '_');
+                a.download = `Combined-${safeName}.pdf`;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    window.URL.revokeObjectURL(url);
+                }, 100);
+                showToast('Combined PDF ready!');
+            }
+        } catch (err) {
+            alert('Merge failed');
+        } finally {
+            hideLoading();
+        }
+    }
+
+    async function loadHistory() {
+        const historyBody = document.getElementById('historyBody');
+        historyBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Loading history...</td></tr>';
+        
+        try {
+            const res = await fetch(`${API_BASE}/history`);
+            const data = await res.json();
+            
+            historyBody.innerHTML = '';
+            data.forEach(item => {
+                const date = new Date(item.gen_date).toLocaleDateString();
+                const tr = document.createElement('tr');
+                const downloadUrl = item.pdf_link.startsWith('/') ? `${API_BASE}${item.pdf_link}` : item.pdf_link;
+                const statusLabel = (item.sign_status === 'SIGNED' || item.sign_status === 'UNSIGNED') ? 'SIGNED (MANUAL)' : item.sign_status;
+                const statusClass = (item.sign_status === 'SIGNED' || item.sign_status === 'UNSIGNED') ? 'status-signed' : 'status-pending';
+
+                tr.innerHTML = `
+                    <td>${date}</td>
+                    <td style="font-weight: 600; color: var(--primary);">${item.bill_no}</td>
+                    <td>${item.customer}</td>
+                    <td style="font-weight: 700;">₹${item.amount}</td>
+                    <td><span class="status ${statusClass}">${statusLabel}</span></td>
+                    <td>
+                        <a href="${downloadUrl}" target="_blank" download="${item.bill_no}.pdf" class="btn btn-accent" style="text-decoration: none; font-size: 0.8rem;">
+                            Download
+                        </a>
+                    </td>
+                `;
+                historyBody.appendChild(tr);
+            });
+            
+            if (data.length === 0) {
+                historyBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">No history found yet.</td></tr>';
+            }
+        } catch (err) {
+            console.error(err);
+            historyBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--accent);">Failed to load history.</td></tr>';
+        }
+    }
+
+    function showLoading(text) {
+        document.getElementById('loadingText').textContent = text;
+        loadingOverlay.style.display = 'flex';
+    }
+
+    function hideLoading() {
+        loadingOverlay.style.display = 'none';
+    }
+
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+</script>
+
+</body>
+</html>

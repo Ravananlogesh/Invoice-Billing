@@ -1,0 +1,62 @@
+================================================================================
+  SHRI DHURGAI TRANS - ELECTRON DESKTOP APP SETUP GUIDE
+================================================================================
+
+This document outlines the steps to convert and package this invoice system
+as a standalone Windows Desktop Application (.exe).
+
+---
+1. PREREQUISITES
+---
+- Ensure Node.js is installed on your system.
+- Ensure all project files are in the same directory.
+
+---
+2. INSTALL PACKAGING TOOLS
+---
+Run the following command in your terminal/command prompt:
+
+npm install --save-dev electron electron-builder concurrently wait-on
+
+---
+3. PROJECT CONFIGURATION (ALREADY COMPLETED)
+---
+- 'main.js': The entry point that starts the backend and opens the window.
+- 'package.json': Updated with build scripts and installer settings.
+- 'dist/': The folder containing compiled TypeScript backend code.
+
+---
+4. HOW TO RUN IN DEVELOPMENT MODE
+---
+To test the desktop app without building an installer:
+
+npm run electron:dev
+
+---
+5. HOW TO GENERATE WINDOWS INSTALLER (.EXE)
+---
+To create the final setup file for users:
+
+1. Compile the backend:
+   npm run build
+
+2. Bundle the application:
+   npm run electron:build
+
+---
+6. WHERE IS THE INSTALLER?
+---
+Once the build is finished, look inside the 'dist_electron' folder.
+You will find:
+- 'Shri Dhurgai Trans Billing-setup.exe' (The installer for other users)
+- 'win-unpacked/' (Folder with the ready-to-run program)
+
+---
+7. SUPPORTED OS
+---
+The 'electron-builder' configuration is set to generate a standard NSIS 
+installer for Windows 10/11.
+
+================================================================================
+Generated for: SHRI DHURGAI TRANS | Intelligent Billing Agent v2.0.0
+================================================================================
